@@ -1,5 +1,5 @@
 import { DateTime } from "https://cdn.skypack.dev/luxon";
-import { default as zzfx } from "https://cdn.skypack.dev/zzfx";
+import { zzfx } from "https://cdn.skypack.dev/zzfx";
 
 class ChatlandClient {
   constructor(socket, document) {
@@ -29,15 +29,15 @@ class ChatlandClient {
     });
 
     socket.on("psa", (message) => {
+      this.playSound("psa");
       addPsaMessage(message);
     });
 
     socket.on("broadcast", (data) => {
-      const { userData, text, time } = data;
+      const { userData, text, time, type } = data;
       const { id, nick } = userData;
       console.log(data);
-      console.log(`New message from ${nick} session ${id}`);
-      // addNewMessage({ userData, text, time });
+      this.playSound("chat");
       this.appendMessage(data);
     });
 
@@ -48,9 +48,19 @@ class ChatlandClient {
       this.chatbox.appendChild(newItem(formatted));
     };
 
-    const addPsaMessage = (message) => {
-      // const timestamp = DateTime().now().toFormat("HH:mm");
-      const formatted = `Chatland System: ${message}`;
+    const addPsaMessage = (data) => {
+      const { type, nick } = data;
+      let formatted;
+      switch (type) {
+        case "userJoined": {
+          formatted = `${nick} has joined the chat.`;
+        }
+        case "userLeft": {
+          formatted = `${nick} has left the chat.`;
+        }
+        default: {
+        }
+      }
       this.chatbox.appendChild(newItem(formatted));
     };
 
@@ -71,7 +81,6 @@ class ChatlandClient {
           );
         }
       } else {
-        this.playSound("chat");
         console.log(`Sending ${text}`);
         const messageData = {
           userData,
@@ -88,7 +97,7 @@ class ChatlandClient {
   }
 
   appendMessage(data) {
-    const { userData, time, text } = data;
+    const { userData, time, text, type } = data;
     const { id, nick } = userData;
     const item = document.createElement("div");
     item.className = "message";
@@ -102,15 +111,41 @@ class ChatlandClient {
     timestamp.innerText = time;
     timestamp.className = "timestamp";
     item.appendChild(timestamp);
-
+    this.playSound("chat");
     this.chatbox.append(item);
   }
 
   playSound(sound) {
     switch (sound) {
+      case "psa": {
+        zzfx(...[0.25, , 1193, 0.01, 0.02, 0.09, , 2.29, -8.7, , 69]); // Blip 7
+        break;
+      }
       case "chat": {
         console.log("sfx");
-        break;
+        zzfx(
+          ...[
+            0.5,
+            0,
+            520,
+            0.11,
+            ,
+            0.01,
+            ,
+            6,
+            90,
+            ,
+            -850,
+            0.37,
+            ,
+            ,
+            ,
+            ,
+            ,
+            0,
+            0.03
+          ]
+        ); // Blip 3        break;
       }
       default: {
         return null;

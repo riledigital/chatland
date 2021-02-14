@@ -1,3 +1,10 @@
+:root {
+  color: white;
+  font-family: -apple-system, sans-serif;
+  font-size: 22px;
+  line-height: 1.45;
+}
+
 body {
   background: black;
   color: white;
