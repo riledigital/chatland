@@ -74,3 +74,9 @@ body {
 .timestamp {
   float: right;
 }
+
+header {
+  padding: 0.5rem;
+  margin: auto;
+  opacity: 0.5;
+}
