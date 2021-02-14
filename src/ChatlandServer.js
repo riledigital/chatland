@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 
 const ROOM_NAME = "main";
 // Add listeners
-class Chatland {
+class ChatlandServer {
   constructor(server, options) {
     this.io = new Server(server, options);
     this.io.on("connection", (socket) => {
@@ -20,7 +20,7 @@ class Chatland {
       });
 
       socket.on("joined", (userData) => {
-        Chatland.makeBroadcast(socket, {
+        ChatlandServer.makeBroadcast(socket, {
           type: "userJoined",
           nick: userData.nick
         });
@@ -29,21 +29,23 @@ class Chatland {
       socket.on("newRegistration", ({ id, nick }) => {
         userData.isRegistered = true;
         userData.nick = nick;
-        socket.to(ROOM_NAME).emit("psa", `${nick} has joined the chat.`);
+        ChatlandServer.makeBroadcast(socket, { type: "userJoined", userData });
       });
 
       socket.on("register", (registration) => {
         if (!socket.info.registered) {
-          socket.emit("psa", "Please enter your nick to send messages.");
+          socket.emit("psa", {
+            type: "error",
+            text: "Please enter your nick to send messages."
+          });
         }
       });
 
       socket.on("disconnect", (reason) => {
         console.log(`Client ${userData.nick} disconnected, ${reason}`);
-        Chatland.makeBroadcast(socket, {
+        ChatlandServer.makeBroadcast(socket, {
           userData,
           text: `${userData.nick} has left the chat.`,
-          time: new DateTime.now(),
           type: "userLeft"
         });
       });
@@ -53,18 +55,18 @@ class Chatland {
         const { id, nick } = userData;
         const newChatData = { userData, text, time, type: "newMessage" };
         console.log(newChatData);
-        Chatland.makeBroadcast(socket, newChatData);
+        ChatlandServer.makeBroadcast(socket, newChatData);
       });
     });
   }
 
   static makeBroadcast(socket, data) {
-    socket.to(ROOM_NAME).emit("psa", data);
+    if (data.type === "newMessage") {
+      socket.to(ROOM_NAME).emit("broadcast", { time: DateTime.now(), ...data });
+    } else if (data.type === "psa") {
+      socket.to(ROOM_NAME).emit("psa", { time: DateTime.now(), ...data });
+    }
   }
 }
 
-// module.exports = function (server, options) {
-//   return new Chatland(server, options);
-// };
-
-export default Chatland;
+export default ChatlandServer;
