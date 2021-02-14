@@ -1,10 +1,11 @@
-// Start up the server
-const io = require("socket.io");
+import { Server } from "socket.io";
+import { DateTime } from "luxon";
+
 const ROOM_NAME = "main";
 // Add listeners
 class Chatland {
   constructor(server, options) {
-    this.io = io(server, options);
+    this.io = new Server(server, options);
     this.io.on("connection", (socket) => {
       const userData = {
         id: socket.id,
@@ -14,15 +15,15 @@ class Chatland {
 
       console.log("Client connected: " + socket.id);
       socket.join(ROOM_NAME);
-      socket.emit(
-        "psa",
-        "Welcome to Chatland! You are in the room: " + ROOM_NAME
-      );
+      socket.emit("psa", {
+        text: `Welcome to Chatland! You are in the room: ${ROOM_NAME}`
+      });
 
       socket.on("joined", (userData) => {
-        socket
-          .to(ROOM_NAME)
-          .emit("psa", `An anonymous reader has joined the chat.`);
+        Chatland.makeBroadcast(socket, {
+          type: "userJoined",
+          nick: userData.nick
+        });
       });
 
       socket.on("newRegistration", ({ id, nick }) => {
@@ -39,20 +40,31 @@ class Chatland {
 
       socket.on("disconnect", (reason) => {
         console.log(`Client ${userData.nick} disconnected, ${reason}`);
-
-        socket.to(ROOM_NAME).emit("psa", `${userData.nick} has left the chat.`);
+        Chatland.makeBroadcast(socket, {
+          userData,
+          text: `${userData.nick} has left the chat.`,
+          time: new DateTime.now(),
+          type: "userLeft"
+        });
       });
 
       socket.on("message", (data) => {
         const { userData, text, time } = data;
         const { id, nick } = userData;
-        console.log(`${time} ${id} / ${nick}: ${text}`);
-        socket.to(ROOM_NAME).emit("broadcast", { userData, text, time });
+        const newChatData = { userData, text, time, type: "newMessage" };
+        console.log(newChatData);
+        Chatland.makeBroadcast(socket, newChatData);
       });
     });
   }
+
+  static makeBroadcast(socket, data) {
+    socket.to(ROOM_NAME).emit("psa", data);
+  }
 }
 
-module.exports = function (server, options) {
-  return new Chatland(server, options);
-};
+// module.exports = function (server, options) {
+//   return new Chatland(server, options);
+// };
+
+export default Chatland;
