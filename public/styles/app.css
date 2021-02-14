@@ -1,0 +1,76 @@
+body {
+  background: black;
+  color: white;
+  font-family: -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#chatbox {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+
+  position: absolute;
+  top: 0;
+  bottom: 4rem;
+  left: 0;
+  max-height: 90vh;
+  width: 85vw;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#form {
+  display: flex;
+  padding: 1rem;
+
+  font-size: 1rem;
+  width: 100%;
+
+  position: fixed;
+  bottom: 0rem;
+  left: 0;
+  right: 0;
+}
+
+#textInput {
+  border: 1px solid white;
+  border-radius: 12px;
+  display: block;
+  padding: 0.5rem 1rem;
+  width: 50%;
+  height: 2rem;
+}
+
+.message {
+  display: block;
+  flex-direction: row;
+  justify-content: space-between;
+
+  max-width: 90%;
+  padding: 0.25rem 0.25rem;
+  hyphens: auto;
+  word-break: break-all;
+}
+
+.nick {
+  display: inline-block;
+  padding-right: 4ch;
+  max-width: 15ch;
+  height: auto;
+  align-self: flex-start;
+  flex-grow: 1;
+}
+
+.message-text {
+  flex-grow: 2;
+}
+
+.timestamp {
+  float: right;
+}
