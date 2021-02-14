@@ -1,9 +1,9 @@
 import { DateTime } from "https://cdn.skypack.dev/luxon";
-import { zzfx } from "https://cdn.skypack.dev/zzfx";
-
+import ChatlandAudio from "/js/ChatlandAudio.js";
 class ChatlandClient {
   constructor(socket, document) {
-    console.log(zzfx);
+    this.audio = new ChatlandAudio();
+    this.preferences = { scroll: true };
     this.chatbox = document.getElementById("chatbox");
 
     const newItem = (content) => {
@@ -20,8 +20,10 @@ class ChatlandClient {
     };
 
     socket.on("connect", () => {
-      this.playSound("chat");
-      this.chatbox.appendChild(newItem("Connected to chat server."));
+      this.audio.playSound("chat");
+      this.chatbox.appendChild(
+        newItem("You have connected to the chat server.")
+      );
       this.chatbox.appendChild(
         newItem("Please set your nick with /nick <your nick>")
       );
@@ -29,15 +31,13 @@ class ChatlandClient {
     });
 
     socket.on("psa", (message) => {
-      this.playSound("psa");
+      this.audio.playSound("psa");
       addPsaMessage(message);
     });
 
     socket.on("broadcast", (data) => {
-      const { userData, text, time, type } = data;
-      const { id, nick } = userData;
       console.log(data);
-      this.playSound("chat");
+      this.audio.playSound("chatIncoming");
       this.appendMessage(data);
     });
 
@@ -54,11 +54,18 @@ class ChatlandClient {
       switch (type) {
         case "userJoined": {
           formatted = `${nick} has joined the chat.`;
+          break;
         }
         case "userLeft": {
           formatted = `${nick} has left the chat.`;
+          break;
+        }
+        case "error": {
+          formatted = `Error! ${data.text}`;
+          break;
         }
         default: {
+          formatted = `${data.text}`;
         }
       }
       this.chatbox.appendChild(newItem(formatted));
@@ -72,13 +79,13 @@ class ChatlandClient {
         if (text.startsWith("/nick") && text.split(" ")[1]) {
           userData.nick = text.split(" ")[1];
           userData.isRegistered = true;
-          addPsaMessage(`Hi there ${userData.nick}!`);
+          addPsaMessage({ text: `Your nick is: ${userData.nick}.` });
           socket.emit("newRegistration", userData);
           document.querySelector("#textInput").value = "";
         } else {
-          addPsaMessage(
-            "Please set your nick with /nick <your desired username>"
-          );
+          addPsaMessage({
+            text: "Please set your nick with /nick <your desired username>"
+          });
         }
       } else {
         console.log(`Sending ${text}`);
@@ -97,60 +104,33 @@ class ChatlandClient {
   }
 
   appendMessage(data) {
+    this.audio.playSound("chat");
     const { userData, time, text, type } = data;
     const { id, nick } = userData;
     const item = document.createElement("div");
     item.className = "message";
 
     const messageText = document.createElement("span");
-    messageText.innerText = nick + ": " + text;
+    messageText.innerText = text;
     messageText.className = "message-text";
-    item.appendChild(messageText);
+    item.insertAdjacentElement("afterbegin", messageText);
+
+    const nickSpan = document.createElement("span");
+    nickSpan.innerText = nick;
+    nickSpan.className = "nick";
+    messageText.insertAdjacentElement("afterbegin", nickSpan);
 
     const timestamp = document.createElement("span");
     timestamp.innerText = time;
     timestamp.className = "timestamp";
     item.appendChild(timestamp);
-    this.playSound("chat");
-    this.chatbox.append(item);
-  }
 
-  playSound(sound) {
-    switch (sound) {
-      case "psa": {
-        zzfx(...[0.25, , 1193, 0.01, 0.02, 0.09, , 2.29, -8.7, , 69]); // Blip 7
-        break;
-      }
-      case "chat": {
-        console.log("sfx");
-        zzfx(
-          ...[
-            0.5,
-            0,
-            520,
-            0.11,
-            ,
-            0.01,
-            ,
-            6,
-            90,
-            ,
-            -850,
-            0.37,
-            ,
-            ,
-            ,
-            ,
-            ,
-            0,
-            0.03
-          ]
-        ); // Blip 3        break;
-      }
-      default: {
-        return null;
-      }
+    this.chatbox.append(item);
+    console.log(data);
+    if (type === "userLeft") {
+      item.classList.add("broadcast--left");
     }
+    item.scrollIntoView();
   }
 }
 
