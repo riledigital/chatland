@@ -10,7 +10,6 @@ class ChatlandAudio {
         break;
       }
       case "chat": {
-        console.log("sfx");
         zzfx(
           ...[
             0.5,
