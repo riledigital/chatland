@@ -1,14 +1,19 @@
 :root {
-  color: white;
-  font-family: -apple-system, sans-serif;
+  --c-fg: #fedfed;
+  --c-bg: #013013;
+  --font-body: -apple-system, sans-serif;
+}
+
+:root {
+  color: var(--c-fg);
+  font-family: var(--font-body);
   font-size: 22px;
   line-height: 1.45;
 }
 
 body {
-  background: black;
-  color: white;
-  font-family: -apple-system, sans-serif;
+  background: var(--c-bg);
+  color: var(--c-fg);
 }
 
 * {

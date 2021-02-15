@@ -9,7 +9,7 @@ class ChatlandAudio {
         zzfx(...[0.25, , 1193, 0.01, 0.02, 0.09, , 2.29, -8.7, , 69]); // Blip 7
         break;
       }
-      case "chat": {
+      case "newMessage": {
         zzfx(
           ...[
             0.5,

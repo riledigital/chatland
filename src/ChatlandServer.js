@@ -22,21 +22,38 @@ class ChatlandServer {
       socket.on("joined", (userData) => {
         ChatlandServer.makeBroadcast(socket, {
           type: "userJoined",
-          nick: userData.nick
+          nick: userData.nick,
+          time: DateTime.now()
         });
       });
 
       socket.on("newRegistration", ({ id, nick }) => {
+        if (nick.length > 15 && nick.length < 1) {
+          socket.emit("psa", {
+            type: "error",
+            text: "Please choose a nick of >= 1 and <= 15 characters."
+          });
+        }
         userData.isRegistered = true;
         userData.nick = nick;
-        ChatlandServer.makeBroadcast(socket, { type: "userJoined", userData });
+
+        socket.emit("psa", {
+          type: "psa",
+          text: `Your nick is: ${userData.nick}.`
+        });
+        ChatlandServer.makeBroadcast(socket, {
+          time: DateTime.now(),
+          type: "userJoined",
+          userData
+        });
       });
 
       socket.on("register", (registration) => {
         if (!socket.info.registered) {
           socket.emit("psa", {
             type: "error",
-            text: "Please enter your nick to send messages."
+            text: "Please enter your nick to send messages.",
+            time: DateTime.now()
           });
         }
       });
@@ -46,13 +63,15 @@ class ChatlandServer {
         ChatlandServer.makeBroadcast(socket, {
           userData,
           text: `${userData.nick} has left the chat.`,
-          type: "userLeft"
+          type: "userLeft",
+          time: DateTime.now()
         });
       });
 
       socket.on("message", (data) => {
         const { userData, text, time } = data;
         const { id, nick } = userData;
+        // Forward the time data from the client
         const newChatData = { userData, text, time, type: "newMessage" };
         console.log(newChatData);
         ChatlandServer.makeBroadcast(socket, newChatData);

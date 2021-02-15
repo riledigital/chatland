@@ -28,10 +28,11 @@ class ChatlandClient {
     });
 
     socket.on("broadcast", (data) => {
-      this.audio.playSound("chat");
+      this.audio.playSound("newMessage");
       this.appendMessage(data);
     });
 
+    // Sidestep losing access to `this`
     this.form.addEventListener("submit", (e) => this.handleChatSubmit(e));
   }
 
@@ -41,8 +42,6 @@ class ChatlandClient {
       if (text.startsWith("/nick") && text.split(" ")[1]) {
         this.userData.nick = text.split(" ")[1];
         this.userData.isRegistered = true;
-        debugger;
-        this.appendPsaMessage({ text: `Your nick is: ${this.userData.nick}.` });
         this.socket.emit("newRegistration", this.userData);
         document.querySelector("#textInput").value = "";
       } else {
@@ -51,19 +50,20 @@ class ChatlandClient {
         });
       }
     } else {
-      console.log(`Sending ${text}`);
-      const newTime = DateTime.now();
-      const messageData = {
-        userData: this.userData,
-        text,
-        time: newTime
-      };
-      this.socket.emit("message", messageData);
-      // addNewMessage(messageData);
-      this.appendMessage(messageData);
+      if (text.length > 1) {
+        const newTime = DateTime.now();
+        const messageData = {
+          userData: this.userData,
+          text,
+          time: newTime
+        };
+        this.socket.emit("message", messageData);
+        console.info(messageData);
+        this.appendMessage(messageData);
+      }
+      document.querySelector("#textInput").value = "";
     }
     e.preventDefault();
-    document.querySelector("#textInput").value = "";
   }
   // Vanilla JS view code
   appendPsaMessage(data) {
@@ -90,6 +90,8 @@ class ChatlandClient {
   }
 
   appendMessage(data) {
+    // This is a pure vanilla JS view function that could
+    // be subbed in for a Vue/React state change
     this.audio.playSound("chat");
     const { userData, time, text, type } = data;
 
