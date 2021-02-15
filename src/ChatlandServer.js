@@ -62,7 +62,7 @@ class ChatlandServer {
 
   static makeBroadcast(socket, data) {
     if (data.type === "newMessage") {
-      socket.to(ROOM_NAME).emit("broadcast", { time: DateTime.now(), ...data });
+      socket.to(ROOM_NAME).emit("broadcast", { ...data });
     } else if (data.type === "psa") {
       socket.to(ROOM_NAME).emit("psa", { time: DateTime.now(), ...data });
     }

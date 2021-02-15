@@ -92,7 +92,7 @@ class ChatlandClient {
         const messageData = {
           userData,
           text,
-          time: DateTime.now().toFormat("HH:mm")
+          time: DateTime().now()
         };
         socket.emit("message", messageData);
         // addNewMessage(messageData);
