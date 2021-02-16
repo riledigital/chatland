@@ -2,6 +2,7 @@
   --c-fg: #fedfed;
   --c-bg: #013013;
   --font-body: -apple-system, sans-serif;
+  --margin: 1rem;
 }
 
 :root {

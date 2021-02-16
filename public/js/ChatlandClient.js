@@ -110,10 +110,13 @@ class ChatlandClient {
 
     const timestamp = document.createElement("span");
     const formattedTime = time
-      ? time
+      ? DateTime.fromISO(time).toFormat("tt ZZZZ", { locale: "en-US" })
       : DateTime.now().toFormat("tt ZZZZ", { locale: "en-US" });
     timestamp.innerText = formattedTime;
-    timestamp.title = time ? time.toFormat("FFFF") : formattedTime;
+
+    timestamp.title = time
+      ? DateTime.fromISO(time).toFormat("FFFF")
+      : formattedTime;
     timestamp.className = "timestamp";
     item.appendChild(timestamp);
 

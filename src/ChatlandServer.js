@@ -72,7 +72,12 @@ class ChatlandServer {
         const { userData, text, time } = data;
         const { id, nick } = userData;
         // Forward the time data from the client
-        const newChatData = { userData, text, time, type: "newMessage" };
+        const newChatData = {
+          userData,
+          text,
+          time: DateTime.fromISO(time),
+          type: "newMessage"
+        };
         console.log(newChatData);
         ChatlandServer.makeBroadcast(socket, newChatData);
       });

@@ -4,8 +4,9 @@ import ChatlandServer from "./ChatlandServer.js";
 const app = express();
 const server = http.createServer(app);
 app.use(express.static("public"));
+
 app.get("/", (req, res) => {
-  // res.send("Hello World!");
+
 });
 
 server.listen(3000);
